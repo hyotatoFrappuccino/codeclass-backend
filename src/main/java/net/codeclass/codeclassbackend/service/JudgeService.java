@@ -29,6 +29,7 @@ public class JudgeService {
     private final JudgeResultRepository judgeResultRepository;
 
     private static final int TIME_LIMIT_SECONDS = 2;
+    private static final int MAX_OUTPUT_BYTES = 512 * 1024; // 512KB
     private static final Random RANDOM = new Random();
 
     @Transactional
@@ -118,7 +119,7 @@ public class JudgeService {
             // stdout을 별도 스레드로 읽어 파이프 버퍼 데드락 방지
             CompletableFuture<String> outputFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    return readLimited(process.getInputStream());
                 } catch (IOException e) {
                     return "";
                 }
@@ -157,7 +158,7 @@ public class JudgeService {
 
             CompletableFuture<String> compileOutputFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return new String(compileProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    return readLimited(compileProcess.getInputStream());
                 } catch (IOException e) {
                     return "";
                 }
@@ -170,7 +171,7 @@ public class JudgeService {
             }
 
             ProcessBuilder runPb = new ProcessBuilder(
-                    "java", "-cp", tempDir.toAbsolutePath().toString(), "Main");
+                    "java", "-Xmx256m", "-cp", tempDir.toAbsolutePath().toString(), "Main");
             runPb.directory(tempDir.toFile());
             runPb.redirectInput(inputFile.toFile());
             runPb.redirectErrorStream(true);
@@ -180,7 +181,7 @@ public class JudgeService {
 
             CompletableFuture<String> outputFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return new String(runProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    return readLimited(runProcess.getInputStream());
                 } catch (IOException e) {
                     return "";
                 }
@@ -208,12 +209,22 @@ public class JudgeService {
         if (file.isDirectory()) {
             File[] children = file.listFiles();
             if (children != null) {
-                for (File child : children) {
-                    deleteRecursively(child);
-                }
+                for (File child : children) deleteRecursively(child);
             }
         }
-        file.delete();
+        if (!file.delete()) {
+            log.warn("임시 파일 삭제 실패: {}", file.getAbsolutePath());
+        }
+    }
+
+    private String readLimited(java.io.InputStream is) throws IOException {
+        var baos = new java.io.ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int read;
+        while (baos.size() < MAX_OUTPUT_BYTES && (read = is.read(buf)) != -1) {
+            baos.write(buf, 0, Math.min(read, MAX_OUTPUT_BYTES - baos.size()));
+        }
+        return baos.toString(StandardCharsets.UTF_8);
     }
 
     private record ExecutionResult(

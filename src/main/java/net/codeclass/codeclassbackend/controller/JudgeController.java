@@ -1,11 +1,15 @@
 package net.codeclass.codeclassbackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.codeclass.codeclassbackend.dto.JudgeResultResponse;
 import net.codeclass.codeclassbackend.dto.SubmitRequest;
 import net.codeclass.codeclassbackend.entity.JudgeResult;
 import net.codeclass.codeclassbackend.repository.JudgeResultRepository;
 import net.codeclass.codeclassbackend.service.JudgeService;
+import net.codeclass.codeclassbackend.service.SubmitRateLimiter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,11 +23,18 @@ public class JudgeController {
 
     private final JudgeService judgeService;
     private final JudgeResultRepository judgeResultRepository;
+    private final SubmitRateLimiter rateLimiter;
 
     @PostMapping("/submit/{problemId}")
     public ResponseEntity<JudgeResultResponse> submit(
             @PathVariable Long problemId,
-            @RequestBody SubmitRequest request) {
+            @Valid @RequestBody SubmitRequest request,
+            HttpServletRequest httpRequest) {
+
+        if (!rateLimiter.tryAcquire(httpRequest.getRemoteAddr())) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
+
         try {
             JudgeResult result = judgeService.submit(
                     problemId, request.getUserId(), request.getLanguage(), request.getCode());

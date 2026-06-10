@@ -34,4 +34,8 @@ public class Problem {
 
     @Column(length = 1000)
     private String exampleOutput;
+
+    private String difficulty;
+
+    private String algorithm;
 }

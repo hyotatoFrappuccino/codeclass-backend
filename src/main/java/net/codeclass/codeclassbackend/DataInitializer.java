@@ -1,10 +1,10 @@
 package net.codeclass.codeclassbackend;
 
 import lombok.RequiredArgsConstructor;
-import net.codeclass.codeclassbackend.entity.JudgeResult;
-import net.codeclass.codeclassbackend.entity.Problem;
-import net.codeclass.codeclassbackend.repository.JudgeResultRepository;
-import net.codeclass.codeclassbackend.repository.ProblemRepository;
+import net.codeclass.codeclassbackend.entity.*;
+import net.codeclass.codeclassbackend.repository.*;
+import net.codeclass.codeclassbackend.repository.CommentRepository;
+import net.codeclass.codeclassbackend.repository.PostRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +17,14 @@ public class DataInitializer implements CommandLineRunner {
 
     private final ProblemRepository problemRepository;
     private final JudgeResultRepository judgeResultRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public void run(String... args) {
         initProblems();
         initJudgeResults();
+        initPosts();
     }
 
     private void initProblems() {
@@ -110,6 +113,104 @@ public class DataInitializer implements CommandLineRunner {
             jr("hyojae.lee",  1L, "맞았습니다!", 5732, 52,  "Python3", 244, now.minusMinutes(1))
         );
         judgeResultRepository.saveAll(results);
+    }
+
+    private void initPosts() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 공지
+        Post n1 = postRepository.save(post(PostCategory.공지, "CodeClass 서비스 오픈 안내", "CodeClass는 알고리즘 학습을 위한 온라인 채점 플랫폼입니다. Python3, Java를 지원하며 앞으로 더 많은 언어와 문제를 추가할 예정입니다.", "운영자", "admin1234", 312, now.minusDays(30), true));
+        Post n2 = postRepository.save(post(PostCategory.공지, "신규 문제 20문제 추가 안내 (그래프/트리)", "그래프와 트리 분야 문제 20문제가 추가되었습니다. 난이도는 중~상으로 구성되어 있습니다.", "운영자", "admin1234", 204, now.minusDays(20)));
+        Post n3 = postRepository.save(post(PostCategory.공지, "Python3 채점 환경 업데이트 (3.11 → 3.12)", "Python 채점 환경이 3.12로 업데이트되었습니다. match 문 등 새 문법을 사용하실 수 있습니다.", "운영자", "admin1234", 178, now.minusDays(15)));
+        Post n4 = postRepository.save(post(PostCategory.공지, "서버 점검 안내 (6/15 새벽 2시~4시)", "정기 서버 점검이 예정되어 있습니다. 해당 시간에는 채점 서비스를 이용하실 수 없습니다.", "운영자", "admin1234", 95, now.minusDays(10), true));
+        Post n5 = postRepository.save(post(PostCategory.공지, "채점 결과 오류 수정 완료", "일부 문제에서 예제 입력 처리 오류가 있었습니다. 현재 정상 복구되었으며, 영향받은 제출 내역은 재채점 처리되었습니다.", "운영자", "admin1234", 143, now.minusDays(7)));
+        Post n6 = postRepository.save(post(PostCategory.공지, "Java 채점 메모리 제한 256MB 적용 안내", "Java 제출 코드에 JVM 힙 메모리 제한(-Xmx256m)이 적용되었습니다. 과도한 메모리 사용 코드는 런타임 에러가 발생할 수 있습니다.", "운영자", "admin1234", 87, now.minusDays(3)));
+
+        // 질문
+        Post q1  = postRepository.save(post(PostCategory.질문, "피보나치 함수 메모이제이션 질문", "재귀로 피보나치를 구현했는데 시간 초과가 납니다. 메모이제이션을 어떻게 적용하면 될까요?", "kimcoding", "1234", 83, now.minusDays(25)));
+        Post q2  = postRepository.save(post(PostCategory.질문, "A+B 문제에서 입력을 어떻게 받나요?", "Python에서 두 수를 한 줄에 입력받는 방법이 궁금합니다. map(int, input().split())을 써야 하나요?", "newbie123", "5678", 47, now.minusDays(22)));
+        Post q3  = postRepository.save(post(PostCategory.질문, "BFS에서 방문 체크를 언제 해야 하나요?", "큐에 넣을 때 방문 처리를 해야 하는지, 꺼낼 때 해야 하는지 헷갈립니다.", "leestu", "pass1234", 61, now.minusDays(18)));
+        Post q4  = postRepository.save(post(PostCategory.질문, "다익스트라 음수 간선 처리", "다익스트라 알고리즘은 음수 간선이 있으면 왜 안 되는지 이유가 궁금합니다.", "algo_noob", "qwer1234", 55, now.minusDays(16)));
+        Post q5  = postRepository.save(post(PostCategory.질문, "재귀 스택 오버플로우 해결법", "N=10000 이상에서 재귀 호출 시 스택 오버플로우가 발생합니다. Python에서 어떻게 해결하나요?", "parkjava", "pass1234", 72, now.minusDays(14)));
+        Post q6  = postRepository.save(post(PostCategory.질문, "유니온 파인드 경로 압축 이해가 안 됩니다", "경로 압축을 적용했을 때 왜 시간 복잡도가 줄어드는지 직관적으로 이해가 어렵습니다.", "choi99", "choi1234", 48, now.minusDays(12)));
+        Post q7  = postRepository.save(post(PostCategory.질문, "세그먼트 트리 구간 업데이트 질문", "포인트 업데이트는 구현했는데 구간 업데이트는 lazy propagation을 써야 한다고 하던데, 개념이 잘 이해가 안 됩니다.", "devjay", "dev1234", 39, now.minusDays(11)));
+        Post q8  = postRepository.save(post(PostCategory.질문, "투 포인터 left < right 조건 질문", "투 포인터 문제에서 while(left < right)와 while(left <= right) 중 어느 조건을 써야 하는지 혼란스럽습니다.", "hyomin_k", "hk1234", 52, now.minusDays(9)));
+        Post q9  = postRepository.save(post(PostCategory.질문, "DP 테이블 초기화 값 설정 기준", "DP 풀 때 dp 배열을 0으로 초기화해야 할 때와 INF로 초기화해야 할 때의 기준이 무엇인가요?", "kimcoding", "1234", 44, now.minusDays(8)));
+        Post q10 = postRepository.save(post(PostCategory.질문, "플로이드 와샬 INF 처리 질문", "플로이드 와샬에서 INF + 가중치 연산 시 오버플로우가 나는 경우가 있는데, 어떻게 방어해야 하나요?", "leestu", "pass1234", 36, now.minusDays(6)));
+        Post q11 = postRepository.save(post(PostCategory.질문, "Java에서 Scanner vs BufferedReader 성능 차이", "입력이 많은 문제에서 Scanner를 쓰면 시간 초과가 나는 경우가 있는데, BufferedReader를 쓰면 해결되나요?", "javadev99", "java1234", 58, now.minusDays(5)));
+        Post q12 = postRepository.save(post(PostCategory.질문, "그래프 문제에서 인접 행렬 vs 인접 리스트 선택 기준", "노드 수와 간선 수에 따라 어떤 자료구조를 선택하는 게 좋은지 알고 싶습니다.", "algo_noob", "qwer1234", 41, now.minusDays(4)));
+        Post q13 = postRepository.save(post(PostCategory.질문, "KMP 실패 함수 계산 방법 이해", "KMP의 핵심인 실패 함수를 어떻게 계산하는지 예시를 들어 설명해주실 수 있나요?", "devjay", "dev1234", 29, now.minusDays(3)));
+        Post q14 = postRepository.save(post(PostCategory.질문, "위상 정렬 사이클 존재 여부 판단", "위상 정렬 수행 후 사이클이 있는지 없는지 어떻게 판단하나요?", "choi99", "choi1234", 33, now.minusDays(2)));
+        Post q15 = postRepository.save(post(PostCategory.질문, "이분 탐색 mid 계산 시 오버플로우 방지", "(left + right) / 2 대신 left + (right - left) / 2를 쓰는 이유가 있나요?", "newbie123", "5678", 27, now.minusDays(1)));
+        Post q16 = postRepository.save(post(PostCategory.질문, "Python 재귀 제한 sys.setrecursionlimit 얼마로 설정하나요?", "DFS 풀 때마다 재귀 제한 때문에 에러가 나는데 얼마로 설정하는 게 안전한가요?", "hyomin_k", "hk1234", 65, now.minusHours(20)));
+        Post q17 = postRepository.save(post(PostCategory.질문, "백트래킹과 완전 탐색의 차이가 뭔가요?", "N-Queen이 백트래킹이라고 하는데, 가지치기가 없으면 완전 탐색이고 있으면 백트래킹인가요?", "kimcoding", "1234", 38, now.minusHours(12)));
+        Post q18 = postRepository.save(post(PostCategory.질문, "힙(우선순위 큐) 다익스트라 구현 질문", "Python heapq로 다익스트라 구현 중 이미 방문한 노드를 어떻게 거르나요?", "parkjava", "pass1234", 43, now.minusHours(8)));
+        Post q19 = postRepository.save(post(PostCategory.질문, "LCA 희소 배열 전처리 시간 복잡도", "LCA를 희소 배열로 풀 때 전처리가 O(N log N)이라고 하는데, 실제 쿼리당 O(log N)이 되는 이유를 알고 싶습니다.", "javadev99", "java1234", 21, now.minusHours(4)));
+        Post q20 = postRepository.save(post(PostCategory.질문, "연결 그래프인지 확인하는 가장 빠른 방법", "주어진 그래프가 연결 그래프인지 BFS/DFS 중 어느 방법이 더 빠른가요?", "leestu", "pass1234", 18, now.minusHours(1)));
+
+        // 자유
+        Post f1  = postRepository.save(post(PostCategory.자유, "드디어 50번 네트워크 플로우 풀었습니다!", "3일 동안 매달렸는데 드디어 AC를 받았네요. 최대 유량 알고리즘 정말 어렵네요.", "parkjava", "pass1234", 94, now.minusDays(24)));
+        Post f2  = postRepository.save(post(PostCategory.자유, "알고리즘 공부 루틴 공유합니다", "저는 매일 1문제씩 풀고, 막히면 1시간 이상은 혼자 고민하는 편입니다. 여러분은 어떤 루틴으로 공부하시나요?", "choi99", "choi1234", 112, now.minusDays(21)));
+        Post f2b = postRepository.save(post(PostCategory.자유, "코딩 테스트 D-30 준비 후기", "한 달 동안 매일 2문제씩 풀었습니다. 덕분에 실력이 많이 늘었어요. 다들 화이팅!", "devjay", "dev1234", 76, now.minusDays(19)));
+        Post f3  = postRepository.save(post(PostCategory.자유, "Python vs Java 채점 속도 비교 해봤습니다", "같은 알고리즘을 Python3와 Java로 구현해서 제출해봤는데, Java가 평균 3배 이상 빠르더라고요.", "hyomin_k", "hk1234", 88, now.minusDays(17)));
+        Post f4  = postRepository.save(post(PostCategory.자유, "처음으로 골드 문제 해결했어요", "벨만-포드 문제를 2시간 만에 혼자 풀었습니다. 예전엔 다익스트라도 어려웠는데 성장한 것 같아서 기쁩니다.", "algo_noob", "qwer1234", 67, now.minusDays(15)));
+        Post f5  = postRepository.save(post(PostCategory.자유, "코딩 테스트 합격 후기 공유", "취준 6개월 만에 드디어 코딩 테스트를 통과했습니다! CodeClass에서 꾸준히 연습한 덕분인 것 같아요.", "kimcoding", "1234", 203, now.minusDays(13)));
+        Post f6  = postRepository.save(post(PostCategory.자유, "알고리즘 공부 시작하기 좋은 순서 추천해드립니다", "개인적으로 구현→정렬→BFS/DFS→DP→그래프 순으로 공부하는 것을 추천합니다. 처음부터 어려운 거 하면 지치더라고요.", "leestu", "pass1234", 134, now.minusDays(11)));
+        Post f7  = postRepository.save(post(PostCategory.자유, "오늘 실수로 무한 루프 코드 제출했다가 타임아웃 ㅋㅋ", "while True: 탈출 조건을 빠뜨리고 제출했습니다. 여러분도 제출 전에 탈출 조건 꼭 확인하세요!", "parkjava", "pass1234", 57, now.minusDays(9)));
+        Post f8  = postRepository.save(post(PostCategory.자유, "그래프 문제 모아서 풀기 챌린지 같이 하실 분?", "이번 주 목표는 그래프 관련 문제 10문제 풀기입니다. 같이 하실 분 댓글 달아주세요!", "javadev99", "java1234", 49, now.minusDays(7)));
+        Post f9  = postRepository.save(post(PostCategory.자유, "재귀 → 반복문으로 바꾸는 연습이 많이 도움됩니다", "재귀를 스택을 이용한 반복문으로 변환하는 연습을 하니까 스택 자료구조 이해도가 확 올라갔어요.", "choi99", "choi1234", 71, now.minusDays(5)));
+        Post f10 = postRepository.save(post(PostCategory.자유, "슬라이딩 윈도우 문제 패턴 정리", "슬라이딩 윈도우 문제를 풀면서 패턴을 정리해봤습니다. 투 포인터랑 같이 이해하면 훨씬 편하더라고요.", "devjay", "dev1234", 62, now.minusDays(4)));
+        Post f11 = postRepository.save(post(PostCategory.자유, "백준 solved.ac 티어 올리기 vs CodeClass 완주 어느게 나을까요", "둘 다 해본 입장에서 CodeClass처럼 문제가 체계적으로 분류된 게 학습에 더 효율적인 것 같습니다.", "hyomin_k", "hk1234", 38, now.minusDays(3)));
+        Post f12 = postRepository.save(post(PostCategory.자유, "문제 50개 완주 후기", "드디어 등록된 문제를 전부 풀었습니다. 네트워크 플로우가 제일 어려웠고, A+B가 제일 쉬웠습니다 ㅎㅎ", "algo_noob", "qwer1234", 155, now.minusDays(2)));
+        Post f13 = postRepository.save(post(PostCategory.자유, "알고리즘 스터디 멤버 모집합니다 (주 2회 온라인)", "매주 화/목 저녁 9시에 화상으로 진행합니다. 하루 1문제 이상 풀 수 있는 분 환영합니다.", "kimcoding", "1234", 84, now.minusDays(1)));
+        Post f14 = postRepository.save(post(PostCategory.자유, "DP 점화식 세우는 게 제일 어렵지 않나요?", "알고리즘 중에서 DP 점화식 도출이 제일 창의력이 필요한 것 같습니다. 여러분은 어떻게 접근하시나요?", "javadev99", "java1234", 46, now.minusHours(10)));
+        Post f15 = postRepository.save(post(PostCategory.자유, "오늘 처음으로 BFS로 최단 경로 구했습니다", "미로 탐색 문제를 드디어 혼자 힘으로 풀었어요! BFS가 최단 경로를 보장한다는 게 이해됐습니다.", "newbie123", "5678", 29, now.minusHours(2)));
+
+        // 댓글
+        commentRepository.save(comment(n1, "운영자", "문의사항은 게시판을 이용해주세요.", now.minusDays(29)));
+        commentRepository.save(comment(n1, "kimcoding", "오픈 축하합니다!", now.minusDays(28)));
+        commentRepository.save(comment(n2, "parkjava", "트리 문제 기다리고 있었습니다!", now.minusDays(19)));
+        commentRepository.save(comment(n4, "choi99", "미리 공지해주셔서 감사합니다.", now.minusDays(9)));
+        commentRepository.save(comment(n6, "javadev99", "메모리 제한이 생겼군요. System.gc() 호출도 안 되겠네요.", now.minusDays(2)));
+
+        commentRepository.save(comment(q1, "leedev", "dp = {} 딕셔너리를 전역으로 선언하고 dp[n]에 결과를 저장하면 됩니다.", now.minusDays(24)));
+        commentRepository.save(comment(q1, "hyojae.lee", "또는 @lru_cache 데코레이터를 사용하면 간단하게 해결됩니다.", now.minusDays(23)));
+        commentRepository.save(comment(q2, "choi99", "map(int, input().split())을 쓰면 됩니다. a, b = map(int, input().split()) 이렇게요.", now.minusDays(21)));
+        commentRepository.save(comment(q3, "parkjava", "큐에 넣을 때 방문 처리하는 게 맞습니다. 꺼낼 때 하면 같은 노드가 여러 번 큐에 들어갈 수 있어요.", now.minusDays(17)));
+        commentRepository.save(comment(q4, "javadev99", "이미 확정된 최단 거리를 음수 간선이 다시 줄일 수 있어서 그리디 가정이 깨집니다. 그 경우엔 벨만-포드를 쓰세요.", now.minusDays(15)));
+        commentRepository.save(comment(q5, "leedev", "sys.setrecursionlimit(10**6) 설정하거나, 아예 반복문으로 변환하는 게 안전합니다.", now.minusDays(13)));
+        commentRepository.save(comment(q8, "choi99", "일반적으로 투 포인터에서는 left < right를, 이진 탐색에서는 left <= right를 씁니다.", now.minusDays(8)));
+        commentRepository.save(comment(q11, "hyojae.lee", "맞습니다. BufferedReader + StringTokenizer 조합이 가장 빠릅니다.", now.minusDays(4)));
+        commentRepository.save(comment(q15, "parkjava", "int 범위에서 left+right가 오버플로우날 수 있기 때문입니다. Java에서 특히 주의해야 해요.", now.minusDays(0)));
+        commentRepository.save(comment(q17, "devjay", "맞습니다. 가지치기 유무가 핵심 차이입니다. 가지치기가 없으면 브루트포스에 가깝습니다.", now.minusHours(10)));
+        commentRepository.save(comment(q18, "kimcoding", "dist[node] < cost 조건으로 이미 더 짧은 거리가 기록된 경우를 스킵하면 됩니다.", now.minusHours(6)));
+
+        commentRepository.save(comment(f2, "kimcoding", "저도 비슷한 루틴인데, 풀이 보고 나서 꼭 직접 다시 구현해보는 게 중요한 것 같아요.", now.minusDays(20)));
+        commentRepository.save(comment(f5, "운영자", "축하합니다! 앞으로도 좋은 결과 있으시길 바랍니다.", now.minusDays(12)));
+        commentRepository.save(comment(f5, "devjay", "저도 열심히 해야겠네요. 동기부여 됩니다!", now.minusDays(12)));
+        commentRepository.save(comment(f6, "newbie123", "감사합니다! 구현부터 시작해야겠어요.", now.minusDays(10)));
+        commentRepository.save(comment(f8, "hyomin_k", "저도 참여하고 싶습니다!", now.minusDays(6)));
+        commentRepository.save(comment(f8, "leestu", "저도요! 연락 방법이 있나요?", now.minusDays(6)));
+        commentRepository.save(comment(f12, "운영자", "완주를 축하합니다! 곧 더 많은 문제가 추가될 예정입니다.", now.minusDays(1)));
+        commentRepository.save(comment(f13, "algo_noob", "참여하고 싶습니다! 어디서 신청하면 되나요?", now.minusHours(20)));
+        commentRepository.save(comment(f15, "choi99", "축하해요! BFS 익히면 최단 경로 문제 대부분 풀 수 있어요.", now.minusHours(1)));
+    }
+
+    private Post post(PostCategory category, String title, String content, String author, String password, int viewCount, LocalDateTime createdAt) {
+        return post(category, title, content, author, password, viewCount, createdAt, false);
+    }
+
+    private Post post(PostCategory category, String title, String content, String author, String password, int viewCount, LocalDateTime createdAt, boolean pinned) {
+        return Post.builder()
+                .category(category).title(title).content(content)
+                .author(author).password(password).viewCount(viewCount).createdAt(createdAt).pinned(pinned)
+                .build();
+    }
+
+    private Comment comment(Post post, String author, String content, LocalDateTime createdAt) {
+        return Comment.builder()
+                .post(post).author(author).content(content).createdAt(createdAt)
+                .build();
     }
 
     private Problem p(long id, String title, int solved, int submissions, String rate,
